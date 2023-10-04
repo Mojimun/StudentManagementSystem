@@ -1,0 +1,113 @@
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header" style="margin: 0px 0px 10px 20px; display: flex;">
+            <h4 class="modal-title">Add Student</h4>
+            <span style="margin-left: auto; cursor: pointer;" onclick="modalClose('addModal')">
+                <i class="fa-solid fa-xmark fa-2xl"></i>
+            </span>
+        </div>
+        <div class="modal-body">
+            <div class="container" style="max-width: 550px; ">
+                <%= form_for(current_user, url: add_student_path, html: { method: :post }) do |f| %>
+                <%= render "devise/shared/error_messages", resource: current_user %>
+                    <% if alert %>
+                        <p class="alert alert-danger"><%= alert %></p>
+                    <% end %>
+                    <div class="row">
+                        <div class="col-md-6">
+                        <div class="field">
+                            <%= f.label :email %>
+                            <%= f.email_field :email, id: "email", autofocus: true, autocomplete: "email", placeholder: "Enter your email", required: true %>
+                        </div>
+                        </div>
+
+                        <%= f.fields_for :student do |s| %> 
+                        <div class="col-md-6">
+                            <div class="field">
+                            <%= s.label :name %>
+                            <%= s.text_field :name, id: "name", placeholder: "Enter your full name", required: true %>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                            <%= s.fields_for :profile do |sp| %>
+                            <div class="field">
+                                <%= sp.label :avatar, "Image" %>
+                                <%= sp.file_field :avatar, accept: 'image/*', placeholder: "Choose an avatar image", id: 'avatar-input' %>
+                            </div>
+                            </div>
+                        
+                            <div class="col-md-6">
+                            <div class="field">
+                                <%= sp.label :bio %>
+                                <%= sp.text_field :bio, placeholder: "Enter your bio", id: "bio", required: true %>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                            <div class="field">
+                                <%= sp.label :dob, "Date of Birth" %>
+                                <%= sp.date_field :dob, placeholder: "Select your date of birth", id: "dob", required: true %>
+                            </div>
+                            </div>
+                    
+                            <div class="col-md-6">
+                            <div class="field">
+                                <%= sp.label :gender %>
+                                <%= sp.select :gender, ["Male", "Female", "Other"], { prompt: "Select your gender" }, { include_blank: false, required: true, id: "gender" } %>
+
+                            </div>
+                            <% end %>
+                            </div>
+                        </div>
+
+                        <%= s.fields_for :address do |sa| %>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                            <div class="field">
+                                <%= sa.label :street, "Address" %>
+                                <%= sa.text_field :street, id: "street", placeholder: "Enter your full address", required: true %>
+                            </div>
+                            </div>
+
+                            <div class="col-md-6">
+                            <div class="field">
+                                <%= sa.label :city %>
+                                <%= sa.text_field :city, id: "city", placeholder: "Enter your city", required: true %>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                            <div class="field">
+                                <%= sa.label :state %>
+                                <%= sa.text_field :state, id: "state", placeholder: "Enter your state", required: true %>
+                            </div>
+                            </div>
+
+                            <div class="col-md-6">
+                            <div class="field">
+                                <%= sa.label :pin %>
+                                <%= sa.text_field :pin, id: "pin", placeholder: "Enter your PIN code", required: true %>
+                            </div>
+                            </div>
+                        </div>
+
+                        <% end %>
+                    <% end %>
+                
+                <div class="actions">
+                    <%= f.button "Cancel", class: "btn btn-danger", type: "button", onclick: "modalClose('addModal')", style: "padding: 10px 20px;" %>
+                    <%= f.submit "Add", class: "btn btn-success", style: "padding: 10px 30px;" %>
+                </div>
+                <% end %>  
+            </div>
+        </div>
+    </div>
+</div>

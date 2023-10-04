@@ -1,3 +1,4 @@
+require 'csv'
 class AdminsController < ApplicationController
   before_action :authenticate_user! 
   def index
@@ -50,5 +51,95 @@ class AdminsController < ApplicationController
       redirect_to root_path
     end
   end
-end
+
+  def save_mass_data_upload
+    if current_user.role == 'Admin'
+      csv_file = params[:csv_file]
+      file_extension = File.extname(csv_file.original_filename)
+      @error_msg = ""
+    
+      if file_extension == ".csv"
+        total_count = 0
+        directory = File.join(Rails.root, 'public', 'uploads')
+    
+        unless File.directory?(directory)
+          FileUtils.mkdir_p directory, mode: 0777 rescue nil
+        end
+    
+        time = Time.now.strftime("%m_%d_%Y_%I_%M_%S%p")
+        file_name = csv_file.original_filename.gsub(file_extension, "").gsub(" ", "_")
+        target_file_name = "#{file_name}_#{time}#{file_extension}"
+        target_file_name_path = "#{directory}/#{target_file_name}"
+    
+        FileUtils.move csv_file.path, target_file_name_path
+        File.open(target_file_name_path, "wb") { |f| f.write(csv_file.read) }
+    
+        CSV.foreach(target_file_name_path, headers: true) do |row|
+          begin
+            user = User.find_by(email: row['Email'])
+    
+            if user.nil?
+              generated_password = Devise.friendly_token.first(8)
+              user = User.new(email: row['Email'])
+              user.password = generated_password
+              user.password_confirmation = generated_password
+              user.build_student(name: row['Name'])
+              user.student.build_profile(bio: row['Bio'], dob: row['Date of Birth'], gender: row['Gender'])
+              user.student.build_address(street: row['Street'], city: row['City'], state: row['State'], pin: row['Pin'])
+              if user.save
+                total_count += 1
+              end
+            end
+          rescue StandardError => e 
+            Rails.logger.error("Error processing CSV row: #{e.message}")
+          end
+        end
+    
+        @error_msg = total_count > 0 ? "File Processed Successfully" : "Records already exist"
+      else
+        @error_msg = "Format of file is not supported"
+      end
+      render plain: @error_msg
+    else 
+      redirect_to root_path
+    end
+  end
+
+  def add_student
+    if current_user.role == 'Admin'
+      user = User.find_by(email: user_params[:email])
+      if user.nil?
+        generated_password = Devise.friendly_token.first(8)
+        user = User.new(email: user_params[:email], password: generated_password, password_confirmation: generated_password)
+        
+        student_params = user_params[:student]
+        user.build_student(name: student_params[:name])
+        user.student.build_profile(student_params[:profile])
+        user.student.build_address(student_params[:address])
+      
+        if user.save
+          flash[:notice] = 'Student Added Successfully.'
+          redirect_to root_path
+        else
+          flash[:alert] = 'Something went wrong.'
+          redirect_back(fallback_location: root_path)
+        end
+      else
+        flash[:alert] = 'Student already exist.'
+        redirect_back(fallback_location: root_path)
+      end
+    else 
+      redirect_to root_path
+    end
+  end
   
+  private
+  
+  def user_params
+    params.require(:user).permit(
+      :email,
+      student: [:name, profile: [:bio, :dob, :gender], address: [:street, :city, :state, :pin]]
+    )
+  end
+  
+end

@@ -25,4 +25,6 @@ Rails.application.routes.draw do
   get "user_details", to: "admins#user_details"
   post "user_verify", to: "admins#user_verify"
   post "user_delete", to: "admins#user_delete"
+  post "save_mass_data_upload", to: "admins#save_mass_data_upload" 
+  post "add_student", to: "admins#add_student"
 end
