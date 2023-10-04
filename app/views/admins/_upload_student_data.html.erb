@@ -12,15 +12,15 @@
         <div class="modal-body">
             <div style="margin: 0px 0px 10px 20px;"> 
                 <label for="upload_file">Select File :</label><br />
-                <input type="file" id="upload_datafile" multiple name="upload[datafile]">
+                <input type="file" id="upload_datafile" multiple name="upload[datafile]" accept=".csv">
             </div>
-            <div style="margin: 0px 0px 10px 20px; margin-top: 44px;"> 
+            <div style="margin-top: 44px;"> 
                 <button id="uploadButton" class="btn btn-success" style="margin-right: 10px;">Upload</button>
                 <button type="button" class="btn btn-danger" style="margin-left: 10px;" onclick="modalClose('uploadModal')">Close</button>
             </div>
             
             <div style="margin: 0px 0px 10px 20px;">
-                <a href="sample_students.csv" download class="btn btn-primary">View Sample CSV File</a>
+                <a href="sample_students.csv" download class="edit-profile-link">Download Sample CSV File</a>
             </div>
         </div>
     </div>
