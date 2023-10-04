@@ -1,0 +1,38 @@
+<style>
+  .container {
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    width: 350px;
+    padding: 20px;
+    max-width: 750px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 5px;
+    margin: 10% auto;
+  }
+</style>
+<div class="container">
+  <h2>Choose Subject</h2>
+
+  <%= form_for(current_user, url: change_subject_request_path) do |f| %>
+   <%= render "devise/shared/error_messages", resource: current_user %>
+
+        <%= f.fields_for :student do |s| %>
+            <%= s.fields_for :subject do |sb| %>
+                <div class="field">
+                        <%= sb.label :name %>
+                        <%= sb.select :name, ["JavaScript", "Ruby on Rails", "Python"], prompt: "Choose Your Subject", include_blank: false, required: true %>
+                </div>
+            <% end %>
+        <% end %>
+        <div class="field">
+        <%= f.label :current_password, 'Current Password' %>
+        <%= f.password_field :current_password, required: true %>
+        </div>
+
+        <div class="actions">
+        <%= f.submit 'Submit' %>
+        </div>
+    <% end %>
+</div>

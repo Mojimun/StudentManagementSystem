@@ -1,0 +1,286 @@
+<body style="background-color: #fff;">
+	<span style="float: right; margin-right: 10px;">Wellcome: Admin | <%= link_to destroy_user_session_path do %>
+    Logout
+	<% end %></span>
+	<div style="margin: 10px 5px; display: flex;">
+		<div style="display: flex; margin-right: 15px;">
+			<button class="btn btn-success" onclick="onBtnExport()" ><i class="fa-solid fa-download fa-xs"></i> Export</button>
+			<button class="btn btn-danger" onclick="batchDelete()"><i class="fa-solid fa-user-minus fa-xs"></i> Delete</button>
+			<button class="btn btn-success" onclick="batch_student_verify()"><i class="fa-solid fa-user-check fa-xs"></i> Verify</button>
+			<button class="btn btn-success" onclick="subject_wise_students_count()">Subject Wise Students Count</button>
+		</div>
+	</div>
+	<div id="loader" class="overlay display-none">
+		<img class="img" src="images/loader.gif" />
+	</div>
+	<div>
+		<div id="agGrid" style="height: 550px; width: 100%;" class="ag-theme-balham"></div>
+	</div>
+	<div id="countModal" class="modal fade">
+        <%= render partial: 'admins/subject_wise_students_count' %>        
+    </div>
+</body>
+
+<script>
+    var columnDefs = [
+		{headerName: "", field: "", width: 60, checkboxSelection: true, headerCheckboxSelection: true, cellStyle: { 'text-align':'center','top': '15px' } },
+		{headerName: "Image", field: "avatar_url", minWidth: 150, width: 100, cellRenderer: ImageCellRenderer, cellStyle: { 'border': '1px solid grey', 'border-radius': '50%', 'height': '40px', 'width': '40px', 'top': '10px', } },
+		{ headerName: "Student Name", field: "name", cellStyle: { 'font-weight': 'bold', 'color': '#666666', 'padding-top': '15px', 'font-size': '15px' } },
+		{ headerName: "Email", field: "email", cellStyle: { 'padding-top': '15px', 'color': '#686868' } },
+		{ headerName: "Date of Birth", field: "dob", cellStyle: { 'padding-top': '15px', 'color': '#686868' } },
+		{ headerName: "Gender", field: "gender", width: 110, cellStyle: { 'padding-top': '15px', 'color': '#686868' } },
+		{ headerName: "Address", field: "address", valueGetter: get_full_address, width: 300, cellStyle: { 'padding-top': '15px', 'color': '#686868' } },
+		{ headerName: "Status", field: "verified", cellRenderer: VarificationFieldRender, width: 150, cellStyle: { 'padding-top': '15px', 'color': '#686868' } },
+		{ headerName: "Subject", field: "subject", width: 150, cellStyle: { 'padding-top': '15px', 'color': '#686868' } }
+	];
+
+	function get_full_address(params) {
+		return params.data.address.street + ', ' + params.data.address.city + ', ' + params.data.address.state + ', PIN: ' + params.data.address.pin ;
+	}
+	var gridOptions =
+	{
+		columnDefs: columnDefs,
+		rowData: null,
+		enableSorting: true,
+		enableFilter: true,
+		rowSelection: 'multiple',
+		headerHeight: 50,
+		rowHeight: 60,
+		enableRangeSelection: true,
+		enableStatusBar: false,
+		// pagination: true,
+        suppressExcelExport: true,
+		suppressRowClickSelection: true,
+		// paginationPageSize: 7,
+		onGridReady: function () { },
+		components: {
+			'imageCellRenderer': ImageCellRenderer,
+			'varificationFieldRender': VarificationFieldRender
+		},
+		onRowClicked: function(event) {
+			const node = event.node;
+			if (node.isSelected()) {
+				node.setSelected(false);
+			} else {
+				node.setSelected(true);
+			}
+		}
+	};
+
+	function onBtnExport() {
+        const columnsToInclude = ['name', 'email', 'dob', 'gender', 'address', 'verified', 'subject'];
+		const currentDate = new Date();
+		const timestamp = currentDate.toISOString().replace(/:/g, '_').replace(/\..+/, '').replace('T', '_');
+		const filenameWithTimestamp = `student_data_${timestamp}.csv`;
+        gridOptions.api.exportDataAsCsv({
+            columnKeys: columnsToInclude,
+            fileName: filenameWithTimestamp
+   		 });
+    }
+
+    function get_grid_load() {
+		createNewDatasource();
+    }
+    $(document).ready(function () {
+        get_grid_load();
+        var gridDiv = document.querySelector('#agGrid');
+		new agGrid.Grid(gridDiv, gridOptions);
+	});
+
+    function createNewDatasource() {
+		$('#loader').removeClass('display-none')
+		$.ajax({
+			type: "get",
+			url: "<%= all_user_path %>",
+			success: function (msg) {
+				var grid_data = msg;
+				gridOptions.api.setRowData(msg);
+				$('#loader').addClass('display-none')
+			},
+			error: function (error) {
+				$('#loader').addClass('display-none')
+			}
+		});
+	}
+	
+    function VarificationFieldRender() { } 
+	function ImageCellRenderer() { }
+
+	VarificationFieldRender.prototype.init = function (params) {
+		this.eGui = document.createElement('div');
+		var text = "";
+		if (params.value){
+			text = '<span style="color: #3085d6;">Active</span>';
+		}else{
+			text = '<span style="color: #d33;">Inactive</span>';
+		}
+		this.eGui.innerHTML = text;
+	};
+
+	VarificationFieldRender.prototype.getGui = function () {
+		return this.eGui;
+	};
+
+	ImageCellRenderer.prototype.init = function (params) {
+        this.eGui = document.createElement('div');
+        var src = `<img src= ${params.value} width='40' height='40'>`
+        this.eGui.innerHTML = src;
+    };
+
+    ImageCellRenderer.prototype.getGui = function () {
+        return this.eGui;
+    };
+
+	function batch_student_verify() {
+		var selected_ids = get_selected_row_ids();
+		if(get_selected_row_ids().length > 0){
+			handleClickVarification(selected_ids);
+		}else {
+			alert('Please select at least one student');
+		}
+	}
+	function handleClickVarification(ids) {
+		Swal.fire({
+			title: `Are you sure you want to verify this student(s)?`,
+			text: `This action will verify the student(s).`,
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: `Yes, verify it!`
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$('#loader').removeClass('display-none')
+				$.ajax({
+					type: 'post',
+					url: '/user_verify',
+					data: { ids: ids },
+					headers: {
+						'X-CSRF-TOKEN': '<%= form_authenticity_token %>'
+					},
+					success: function (data) {
+						console.log(data.message);
+						if (data.message == 'Success') {
+						Swal.fire(
+							'Verified!',
+							'Student(s) has been Verified successfully.',
+							'success'
+						);
+						} else {
+						Swal.fire(
+							'Already Active!',
+							'Student(s) already Verified.',
+							'warning'
+						);
+						}
+						get_grid_load();
+						$('#loader').addClass('display-none');
+					},
+					error: function (xhr, status, error) {
+						get_grid_load();
+						$('#loader').addClass('display-none');
+						console.error(xhr.responseText);
+					}
+				});
+			}else {
+				get_grid_load();
+			}
+		});
+	}
+	
+	function batchDelete() {
+		var selected_ids = get_selected_row_ids();
+		if(get_selected_row_ids().length > 0){
+			handleClickDelete(selected_ids);
+		}else {
+			alert('Please select at least one student');
+		}
+	}
+
+	function handleClickDelete(ids) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: 'You won\'t be able to revert this!',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'Yes, delete it!'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$('#loader').removeClass('display-none')
+				$.ajax({
+					type: 'post',
+					url: '/user_delete',
+					data: { ids: ids },
+					headers: {
+						'X-CSRF-TOKEN': '<%= form_authenticity_token %>'
+					},
+					success: function (data) {
+						if (data.message == 'Success') {
+							Swal.fire(
+								'Deleted!',
+								'Student has been deleted.',
+								'success'
+							);
+							}else {
+								Swal.fire(
+									'Error!',
+									'Student(s) did not found.',
+									'warning'
+								);
+							}
+						get_grid_load();
+						$('#loader').addClass('display-none')
+					},
+					error: function (xhr, status, error) {
+						$('#loader').addClass('display-none');
+						console.error(xhr.responseText);
+					}
+				});
+			}
+		});
+	}
+
+	function get_selected_row_ids(){
+		var sel_rows=[]; 
+		gridOptions.api.forEachNodeAfterFilterAndSort(function(node, index){
+			if (node.selected == true) {
+				if (node.data) { 
+					sel_rows.push(node.data.id);
+				} 
+			}
+		});
+		return sel_rows;
+	}
+
+	function subject_wise_students_count() {
+		$('#loader').removeClass('display-none')
+		$.ajax({
+			type: "get",
+			url: "subject_wise_students_count",
+			success: function (data) {
+				$('#loader').addClass('display-none')
+				$('#countModal').modal('show');
+				var table = document.getElementById('table_data');
+				var table_data = "";
+				Object.keys(data).forEach(function(key) {
+					var value = data[key];
+					table_data += '<tr>';
+					table_data += '<td>' + key + '</td>';
+					table_data += '<td>' + value + '</td>';
+					table_data += '</tr>';
+				});
+				table.innerHTML = table_data;
+			},
+			error: function (error) {
+				$('#loader').addClass('display-none')
+			}
+		});
+	}
+
+	function modalClose() {
+		$('#countModal').modal('hide');
+	}
+
+</script>

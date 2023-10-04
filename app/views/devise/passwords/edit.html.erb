@@ -1,0 +1,43 @@
+<style>
+
+  .container {
+    justify-content: center;
+    align-items: center;
+    height: 350px;
+    width: 350px;
+    padding: 20px;
+    max-width: 750px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 5px;
+    margin: 10% auto;
+  }
+
+</style>
+
+<div class="container">
+  <h2>Change your password</h2>
+
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+    <%= f.hidden_field :reset_password_token %>
+
+    <div class="field">
+      <%= f.label :password, "New password" %><br />
+      <% if @minimum_password_length %>
+        <em>(<%= @minimum_password_length %> characters minimum)</em><br />
+      <% end %>
+      <%= f.password_field :password, autofocus: true, autocomplete: "new-password", required: true %>
+    </div>
+
+    <div class="field">
+      <%= f.label :password_confirmation, "Confirm new password" %><br />
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true %>
+    </div>
+
+    <div class="actions">
+      <%= f.submit "Change" %>
+    </div>
+  <% end %>
+
+</div>

@@ -1,0 +1,29 @@
+<div class="profile-container">
+  <div style="text-align: right;">
+    <span>Welcome: <%= current_user.student.name %></span> | <%= link_to destroy_user_session_path do %>
+    Logout
+    <% end %>
+  </div>
+  <h1>Profile</h1>
+  <div class="profile-info">
+    <div class="avatar">
+      <% if current_user.student.profile.avatar.attached? %>
+          <%= image_tag current_user.student.profile.avatar, style: "border-radius: 50%;", size: "100x100" %>
+      <% else %>
+        <%= image_tag "https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg", style: "border-radius: 50%;", size: "100x100" %>
+      <% end %>
+    </div>
+    <div class="user-details">
+      <p>Name: <%= current_user.student.name %></p>
+      <p>Date of Birth: <%= current_user.student.profile.dob %></p>
+      <p>Gender: <%= current_user.student.profile.gender %></p>
+      <p>Address: <%= current_user.student.address.city %></p>
+      <p>Email: <%= current_user.email %></p>
+      <p>Subject: <%= current_user.student.subject.name %></p>
+      <div style="display: flex;">
+        <%= link_to 'Edit Profile', edit_user_registration_path, class: 'edit-profile-link' %>
+        <%= link_to 'Change Password', change_password_path, class: 'edit-profile-link' %>
+      </div>
+    </div>
+  </div>
+</div>

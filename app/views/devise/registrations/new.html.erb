@@ -1,0 +1,116 @@
+<style>
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    height: auto;
+    margin: 5% auto;
+    border-radius: 5px;
+    background-color: #fff;
+    max-width: 550px; 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding-bottom: 20px !important;
+    /* margin-top: 15px !important; */
+  }
+
+</style>
+<div class="container">
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+      <h2>Student Registration Form</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="field">
+            <%= f.label :email %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Enter your email", required: true %>
+          </div>
+        </div>
+
+        <%= f.fields_for :student do |s| %> 
+          <div class="col-md-6">
+            <div class="field">
+              <%= s.label :name %>
+              <%= s.text_field :name, placeholder: "Enter your full name", required: true %>
+            </div>
+          </div>
+      </div>
+
+          <div class="row">
+            <div class="col-md-6">
+            <%= s.fields_for :profile do |sp| %>
+              <div class="field">
+                  <%= sp.label :avatar, "Image" %>
+                  <%= sp.file_field :avatar, accept: 'image/*', placeholder: "Choose an avatar image", id: 'avatar-input' %>
+              </div>
+              </div>
+          
+            <div class="col-md-6">
+              <div class="field">
+                  <%= sp.label :bio %>
+                  <%= sp.text_field :bio, placeholder: "Enter your bio", required: true %>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field">
+                  <%= sp.label :dob, "Date of Birth" %>
+                  <%= sp.date_field :dob, placeholder: "Select your date of birth", required: true %>
+              </div>
+            </div>
+    
+            <div class="col-md-6">
+              <div class="field">
+                  <%= sp.label :gender %>
+                  <%= sp.select :gender, ["Male", "Female", "Other"], prompt: "Select your gender", include_blank: false, required: true %>
+              </div>
+            <% end %>
+            </div>
+          </div>
+
+        <%= s.fields_for :address do |sa| %>
+         
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field">
+                  <%= sa.label :street, "Address" %>
+                  <%= sa.text_field :street, placeholder: "Enter your full address", required: true %>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="field">
+                  <%= sa.label :city %>
+                  <%= sa.text_field :city, placeholder: "Enter your city", required: true %>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="field">
+                  <%= sa.label :state %>
+                  <%= sa.text_field :state, placeholder: "Enter your state", required: true %>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="field">
+                  <%= sa.label :pin %>
+                  <%= sa.text_field :pin, placeholder: "Enter your PIN code", required: true %>
+              </div>
+            </div>
+          </div>
+
+        <% end %>
+      <% end %>
+      
+      <div class="actions">
+        <%= f.submit "Sign up" %>
+      </div>
+      Back to
+    <%= render "devise/shared/links" %>
+    <% end %>  
+</div>
+  

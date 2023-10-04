@@ -1,0 +1,34 @@
+<style>
+
+  .container {
+    justify-content: center;
+    align-items: center;
+    height: 350px;
+    width: 350px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 5px;
+    margin: 10% auto;
+  }
+
+</style>
+
+<div class="container">
+  <h2>Forgot your password?</h2>
+
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="field">
+      <%= f.label :email %><br />
+      <%= f.email_field :email, autofocus: true, autocomplete: "off", placeholder: "Enter your email", required: true%>
+    </div>
+    <label>**Note: Reset link will be send your email**</label>
+    <div class="actions">
+      <%= f.submit "Send" %>
+    </div><br />
+  <% end %>
+  Back to
+  <%= render "devise/shared/links" %>
+</div>

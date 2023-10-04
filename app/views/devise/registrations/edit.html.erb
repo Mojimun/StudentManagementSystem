@@ -1,0 +1,133 @@
+<style>
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    height: auto;
+    margin: 4% auto;
+    border-radius: 5px;
+    background-color: #fff;
+    max-width: 550px; 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    /* margin-top: 5px !important; */
+    padding-bottom: 10px;
+  }
+
+</style>
+<div class="container">
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+    <h2>Update Profile</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="field">
+          <%= f.label :email %>
+          <div><%= current_user.email %></div>
+        </div>
+      </div>
+    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+      <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
+    <% end %>
+
+      <%= f.fields_for :student do |s| %>
+      <div class="col-md-6">
+        <div class="field">
+          <%= s.label :name %>
+          <%= s.text_field :name, placeholder: "Enter your full name", value: current_user.student.name, required:true %>
+        </div>
+      </div>
+    </div>
+
+      <%= s.fields_for :profile do |sp| %>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="field">
+              <%= sp.label :avatar, "Image" %>
+              <%= sp.file_field :avatar, accept: 'image/*', placeholder: "Choose an avatar image", id: 'avatar-input' %>
+          </div>
+        </div>
+      
+        <div class="col-md-6">
+          <div class="field">
+              <%= sp.label :bio %>
+              <%= sp.text_field :bio, placeholder: "Enter your bio", value: current_user.student.profile.bio, required:true %>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+               <% if current_user.student.profile.avatar.attached? %>
+                  <%= image_tag current_user.student.profile.avatar, style: "border-radius: 50%;height: 66px;width: 66px;margin-left: 60px;", size: "100x100" %>
+              <% else %>
+                <%= image_tag "https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg", style: "border-radius: 50%;height: 66px;width: 66px;margin-left: 60px;", size: "100x100" %>
+              <% end %>
+        </div>
+
+        <div class="col-md-6">
+          <div class="field">
+              <%= sp.label :dob, "Date of Birth" %>
+              <%= sp.date_field :dob, placeholder: "Select your date of birth", value: current_user.student.profile.dob, required:true %>
+          </div>
+        </div>
+      </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="field">
+              <%= sp.label :gender %>
+              <%= sp.select :gender, ["Male", "Female", "Other"], prompt: "Select your gender", include_blank: false, selected: current_user.student.profile.gender, required:true %>
+            </div>
+          </div>
+      <% end %>
+
+      <%= s.fields_for :address do |sa| %>
+        <div class="col-md-6">
+          <div class="field">
+              <%= sa.label :street, "Address" %>
+              <%= sa.text_field :street, placeholder: "Enter your full address", value: current_user.student.address.street, required:true %>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="field">
+              <%= sa.label :city %>
+              <%= sa.text_field :city, placeholder: "Enter your city", value: current_user.student.address.city, required:true %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="field">
+              <%= sa.label :state %>
+              <%= sa.text_field :state, placeholder: "Enter your state", value: current_user.student.address.state, required:true %>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="field">
+              <%= sa.label :pin %>
+              <%= sa.text_field :pin, placeholder: "Enter your PIN code", value: current_user.student.address.pin, required:true %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+
+      <div class="col-md-6">
+        <div class="field">
+          <%= f.label :current_password, "Current Password:" %>
+          <%= f.password_field :current_password, autocomplete: "current-password", required:true %>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <%= f.submit "Update" %>
+    </div>
+      <%= link_to "Back", :back %>
+  <% end %>
+</div>
