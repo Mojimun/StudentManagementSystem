@@ -4,26 +4,36 @@ class AdminsController < ApplicationController
   def index
     redirect_to root_path if current_user.role != 'Admin'
   end
+
   def all_user
     if current_user.role == 'Admin'
-      user_data = User.includes(student: [:profile, :address, :subject]).where.not(role: "Admin").map do |user|
+      users = User.includes(student: [:profile, :address, :subject]).where.not(role: "Admin")
+  
+      if params[:search].present?
+        filter = params[:search]
+        users = User.joins(student: [:profile, :address]).where("users.email LIKE ? or students.name LIKE ? or profiles.dob LIKE ? or profiles.gender LIKE ? or addresses.street LIKE ? or addresses.city LIKE ? or addresses.state LIKE ? or addresses.pin LIKE ?", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%")
+      end
+  
+      user_data = users.map do |user|
         {
           id: user.id,
-          name: user.student&.name,
+          name: user.student&.name,  
           verified: user.student&.verified,
           email: user.email,
           dob: user.student.profile&.dob,
-          subject: user.student.subject.nil? ? "Not enroll yet" : user.student.subject&.name,
+          subject: user.student.subject.nil? ? "Not enrolled yet" : user.student.subject&.name,
           gender: user.student.profile&.gender,
           address: user.student.address,
           avatar_url: user.student.profile.avatar.attached? ? url_for(user.student.profile.avatar) : "https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg"
         }
-      end    
-      render :json => user_data
-    else 
+      end
+  
+      render json: user_data
+    else
       redirect_to root_path
     end
-  end
+  end  
+  
 
   def user_verify
     if current_user.role == 'Admin'

@@ -11,6 +11,12 @@
 			<button class="btn btn-danger" onclick="batchDelete()"><i class="fa-solid fa-user-minus fa-xs"></i> Delete</button>
 			<button class="btn btn-success" onclick="batch_student_verify()"><i class="fa-solid fa-user-check fa-xs"></i> Verify</button>
 			<button class="btn btn-primary" onclick="subject_wise_students_count()">Subject Wise Students Count</button>
+			<div class="input-group rounded" style="margin-top: 20px;display: flex;">
+				<input type="search" class="form-control rounded" placeholder="Search in .." aria-label="Search" aria-describedby="search-addon" onkeyup="handleSearchChange(this.value)" />
+				<span class="input-group-text border-0" id="search-addon">
+					<i class="fas fa-search searchbar"></i>
+				</span>
+			</div>
 		</div>
 	</div>
 	<div id="loader" class="overlay display-none">
@@ -99,11 +105,12 @@
 		new agGrid.Grid(gridDiv, gridOptions);
 	});
 
-    function createNewDatasource() {
+    function createNewDatasource(search_str = '') {
 		$('#loader').removeClass('display-none')
 		$.ajax({
 			type: "get",
 			url: "<%= all_user_path %>",
+			data: {search: search_str},
 			success: function (msg) {
 				var grid_data = msg;
 				gridOptions.api.setRowData(msg);
@@ -376,5 +383,13 @@
 				console.error(xhr.responseText);
             }
         });
+	}
+
+	function handleSearchChange(value) {
+		if (value != ""){
+			createNewDatasource(value);
+		}else{
+			createNewDatasource();
+		}
 	}
 </script>
