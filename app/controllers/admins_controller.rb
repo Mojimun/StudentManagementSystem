@@ -132,13 +132,71 @@ class AdminsController < ApplicationController
       redirect_to root_path
     end
   end
+
+  def get_student_data
+    if current_user.role == 'Admin'
+      user = User.find(params[:id].first)
+      user_data = nil
+      if !user.nil?
+        user_data = {
+          id: user.id,
+          name: user.student.name,
+          email: user.email,
+          bio: user.student.profile.bio,
+          dob: user.student.profile.dob,
+          gender: user.student.profile.gender,
+          address: user.student.address,
+        }
+      end
+      render :json => user_data
+    else 
+      redirect_to root_path
+    end
+  end
+
+  def update_student
+    if current_user.role == 'Admin'
+      user = User.find(user_params[:id])
+      if user.nil?
+        flash[:alert] = 'Student not found.'
+        redirect_back(fallback_location: root_path)
+      else
+        email_exist = User.where(email: user_params[:email]).where.not(id: user_params[:id]).first
+        if email_exist.nil?
+          user.update(email: user_params[:email])
+          student_params = user_params[:student]
+          if user.student
+            user.student.update(name: student_params[:name])
+            if user.student.profile
+              user.student.profile.update(student_params[:profile])
+            end
+            if user.student.address
+              user.student.address.update(student_params[:address])
+            end
+            flash[:notice] = 'Student Updated Successfully.'
+            redirect_to root_path
+          else
+            flash[:alert] = 'Student data not found.'
+            redirect_back(fallback_location: root_path)
+          end
+        else
+          flash[:alert] = 'Email already Exist.'
+          redirect_back(fallback_location: root_path)
+        end
+      end
+    else
+      flash[:alert] = 'You do not have permission to perform this action.'
+      redirect_to root_path
+    end
+  end  
   
   private
   
   def user_params
     params.require(:user).permit(
+      :id,
       :email,
-      student: [:name, profile: [:bio, :dob, :gender], address: [:street, :city, :state, :pin]]
+      student: [:name, profile: [:bio, :dob, :gender, :avatar], address: [:street, :city, :state, :pin]]
     )
   end
   

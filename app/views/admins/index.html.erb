@@ -7,6 +7,7 @@
 			<button class="btn btn-primary" onclick="onBtnExport()" ><i class="fa-solid fa-download fa-xs"></i> Export</button>
 			<button class="btn btn-default" onclick="onBtnUpload()" ><i class="fa-solid fa-upload fa-xs"></i> Upload</button>
 			<button class="btn btn-success" onclick="onBtnAdd()" ><i class="fa-solid fa-user-plus fa-xs"></i> Add</button>
+			<button class="btn btn-primary" onclick="onBtnEdit()" ><i class="fa-solid fa-user-edit fa-xs"></i> Edit</button>
 			<button class="btn btn-danger" onclick="batchDelete()"><i class="fa-solid fa-user-minus fa-xs"></i> Delete</button>
 			<button class="btn btn-success" onclick="batch_student_verify()"><i class="fa-solid fa-user-check fa-xs"></i> Verify</button>
 			<button class="btn btn-primary" onclick="subject_wise_students_count()">Subject Wise Students Count</button>
@@ -26,6 +27,9 @@
     </div>
 	<div id="addModal" class="modal fade">
 		<%= render partial: 'admins/add_student_data' %>        
+    </div>
+	<div id="editModal" class="modal fade">
+		<%= render partial: 'admins/edit_student_data' %>        
     </div>
 </body>
 
@@ -340,4 +344,37 @@
 		$('#addModal').modal('show');
 	}
 
+	function onBtnEdit() {
+		var selected_id = get_selected_row_ids();
+		if(get_selected_row_ids().length == 1){
+			handleClickEdit(selected_id);
+		}else {
+			alert('Please select one student');
+		}
+	}
+
+	function handleClickEdit(id) {
+		$.ajax({
+            type: 'get',
+            url: '/get_student_data',
+            data: {id: id},
+            success: function (data) {
+				$('#userID').val(data.id);
+				$('#editEmail').val(data.email);
+				$('#editName').val(data.name);
+				$('#editBio').val(data.bio);
+				$('#editDob').val(data.dob);
+				$('#editGender').val(data.gender);
+				$('#avatar').val('');
+				$('#editStreet').val(data.address.street);
+				$('#editCity').val(data.address.city);
+				$('#editState').val(data.address.state);
+				$('#editPin').val(data.address.pin);
+				$('#editModal').modal('show');
+            },
+            error: function (xhr, status, error) {
+				console.error(xhr.responseText);
+            }
+        });
+	}
 </script>
