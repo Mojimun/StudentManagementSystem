@@ -11,7 +11,7 @@ class AdminsController < ApplicationController
   
       if params[:search].present?
         filter = params[:search]
-        users = User.joins(student: [:profile, :address]).where("users.email LIKE ? or students.name LIKE ? or profiles.dob LIKE ? or profiles.gender LIKE ? or addresses.street LIKE ? or addresses.city LIKE ? or addresses.state LIKE ? or addresses.pin LIKE ?", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%")
+        users = User.joins(student: [:profile, :address, :subject]).where("users.email LIKE ? or students.name LIKE ? or profiles.dob LIKE ? or profiles.gender LIKE ? or addresses.street LIKE ? or addresses.city LIKE ? or addresses.state LIKE ? or addresses.pin LIKE ? or subjects.name LIKE ?", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%", "%#{filter}%")
       end
   
       user_data = users.map do |user|
